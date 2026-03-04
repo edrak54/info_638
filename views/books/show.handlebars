@@ -1,0 +1,10 @@
+<h1>{{book.title}}</h1>
+
+<p>  Written by {{#each authors}}{{this.firstName}} {{this.lastName}}{{#unless @last}}, {{/unless}}{{/each}}
+</p>
+
+<p>
+  First published in {{book.publishingYear}}
+</p>
+
+<a href="/books/edit?id={{bookIdx}}">edit</a>

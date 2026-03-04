@@ -5,8 +5,22 @@
   </div>
   <div>
     <label for="publishingYear">Publishing year</label>
-    <input type="text" id="publishingYear" name="publishingYear" {{#if book}}value="{{book.publishingYear}}"{{/if}}>
+    <input type="number" step="1" id="publishingYear" name="publishingYear" {{#if book}}value="{{book.publishingYear}}"{{/if}}>
   </div>
+    <div class="mb-3">
+      <label for="authorId">Author</label>
+          <select name="authorIds" multiple id="authorIds">
+            <option disabled value>-- select Authors --</option>
+            {{#each authors}}
+              <option value="{{@index}}"
+                {{#if (and @root.book (in @root.book.authorIds @index))}}selected{{/if}}>
+                  {{this.firstName}} {{this.lastName}}
+              </option>
+            {{/each}}
+          </select>
+    </div>
+{{#if book}}
   <input type="hidden" value="{{bookIdx}}" name="id">
+{{/if}}
   <button type="submit" class="btn btn-primary">Submit</button>
 </form>
