@@ -1,18 +1,24 @@
 const express = require('express');
 const router = express.Router();
+
 const Book = require('../models/book');
 const Author = require('../models/author');
+const Genre = require('../models/genre');
 
 router.get('/', function(req, res, next) {
-  res.render('books/index', { title: 'BookedIn || Books', books: Book.all });
+  const books = Book.all
+  res.render('books/index', { title: 'BookedIn || books', books: books });
 });
 
-router.get('/form', function(req, res, next) {
-  res.render('books/form', { title: 'BookedIn || Books', authors: Author.all});
+router.get('/form', async (req, res, next) => {
+  res.render('books/form', { 
+    title: 'BookedIn || Books', 
+    authors: Author.all, 
+    genres: Genre.all });
 });
 
-router.post('/upsert', function(req, res, next) {
-  console.log('body: ' + JSON.stringify(req.body));
+router.post('/upsert', async (req, res, next) => {
+  console.log('body: ' + JSON.stringify(req.body))
   Book.upsert(req.body);
   let createdOrupdated = req.body.id ? 'updated' : 'created';
   req.session.flash = {
@@ -20,25 +26,34 @@ router.post('/upsert', function(req, res, next) {
     intro: 'Success!',
     message: `the book has been ${createdOrupdated}!`,
   };
-  res.redirect(303, '/books');
+  res.redirect(303, '/books')
 });
 
-router.get('/edit', function(req, res, next) {
-  let bookIdx = req.query.id;
-  let book = Book.get(bookIdx);
-  res.render('books/form', { title: 'BookedIn || Books', book: book, bookIdx: bookIdx, authors: Author.all});
+router.get('/edit', async (req, res, next) => {
+  let bookIndex = req.query.id;
+  let book = Book.get(bookIndex);
+  res.render('books/form', {
+    title: 'BookedIn || Books',
+    book: book,
+    bookIndex: bookIndex,
+    authors: Author.all,
+    genres: Genre.all
+  });
 });
 
-router.get('/show/:id', function(req, res, next) {
-  let bookIdx = req.params.id;
-  let book = Book.get(bookIdx);
-  let author = Author.get(book.authorId);
-  let authors = []
-  if (book.authorIds) {
-    authors = book.authorIds.map(Author.get);
+router.get('/show/:id', async (req, res, next) => {
+  var templateVars = {
+    title: "BookedIn || show",
+    book: Book.get(req.params.id)
   }
-  res.render('books/show', { title: 'BookedIn || Books', book: book, bookIdx: bookIdx, authors: authors});
+  if (templateVars.book.authorIds) {
+    templateVars.authors = templateVars.book.authorIds.map((authorId) => Author.get(authorId));
+  }
+  if ("genreId" in templateVars.book) {
+    templateVars['genre'] = Genre.get(templateVars.book.genreId);
+  }
+
+  res.render('books/show', templateVars);
 });
 
 module.exports = router;
-

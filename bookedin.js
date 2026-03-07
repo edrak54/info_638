@@ -1,6 +1,22 @@
-//framework inserts
+//framework imports
 const express = require('express');
 const bodyParser = require('body-parser');
+const { credentials } = require('./config');
+const cookieParser = require('cookie-parser')
+const expressSession = require('express-session')
+
+
+//application imports
+const indexRouter = require('./routes/index');
+const authorsRouter = require('./routes/authors');
+const booksRouter = require('./routes/books');
+const genresRouter = require('./routes/genres');
+
+
+//framework setup
+const app = express();
+const port = 3000;
+
 var handlebars = require('express-handlebars').create({
   helpers: {
     eq: (v1, v2) => v1 == v2,
@@ -20,24 +36,9 @@ var handlebars = require('express-handlebars').create({
     dateStr: (v) => v && v.toLocaleDateString("en-US")
   }
 });
-const { credentials } = require('./config')
-const cookieParser = require('cookie-parser')
-const expressSession = require('express-session')
-
-
-
-const app = express();
-const port = 3000;
-
-//application imports
-const indexRouter = require('./routes/index');
-const authorsRouter = require('./routes/authors');
-const booksRouter = require('./routes/books');
-const genresRouter= require('./routes/genres');
-
 app.engine('handlebars', handlebars.engine);
 app.set('view engine', 'handlebars');
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: true }))
 app.use(cookieParser(credentials.cookieSecret));
 app.use(expressSession({
   secret: credentials.cookieSecret,
@@ -46,16 +47,13 @@ app.use(expressSession({
   cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 } // 30 days
 }));
 
-
 // session configuration
 //make it possible to use flash messages, and pass them to the view
 app.use((req, res, next) => {
   res.locals.flash = req.session.flash
-    delete req.session.flash
+  delete req.session.flash
   next()
 })
-
-
 
 
 //application setup
@@ -64,18 +62,21 @@ app.use('/authors', authorsRouter);
 app.use('/books', booksRouter);
 app.use('/genres', genresRouter);
 
-// custom 404 page
+
 app.use((_req, res) => {
-    res.status(404);
-    res.send("<h1>404 - Not Found, No One Home</h1>");
-})
-// custom 500 page
+  res.status(404);
+  res.send("<h1>404 - please go away, i am not home!</h1>");
+});
+
 app.use((err, _req, res, _next) => {
-    console.error(err.message);
-    res.status(500);
-    res.send("<h1>500 - Server Error</h1>");
+  console.error(err.message);
+  res.status(500);
+  res.send("<h1>500 - Aaaahrg, why did you do this to me!</h1>");
 })
+
+
+
+
 app.listen(port, () => console.log(
-    `Express started on http://localhost:${port}; ` +
-    `press Ctrl-C to terminate.`
-));
+`Express started on http://localhost:${port}
+press Ctrl-C to terminate.`));

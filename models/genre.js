@@ -1,9 +1,9 @@
 const genres = [
     {genre: "classic"},
-    {genre: "mystery"}
+    {genre: "mystery"},
+    {genre: "biography"},
+    {genre: "horror"}
 ];
-
-exports.all = genres;
 
 exports.upsert = (genre) => {
   if (genre.id) {
@@ -23,3 +23,5 @@ exports.update = (genre) => {
 exports.get = (idx) => {
   return genres[idx];
 }
+
+exports.all = genres;

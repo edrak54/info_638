@@ -13,6 +13,12 @@ router.get('/form', function(req, res, next) {
 router.post('/upsert', function(req, res, next) {
   console.log('body: ' + JSON.stringify(req.body));
   Genre.upsert(req.body);
+  let createdOrupdated = req.body.id ? 'updated' : 'created';
+  req.session.flash = {
+    type: 'info',
+    intro: 'Success!',
+    message: `the genre has been ${createdOrupdated}!`,
+  };
   res.redirect(303, '/genres');
 });
 
