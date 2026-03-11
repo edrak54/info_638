@@ -3,6 +3,14 @@ const router = express.Router();
 const User = require('../models/user');
 
 router.get('/register', async (req, res, next) => {
+  if (req.session.currentUser) {
+    req.session.flash = {
+      type: 'info',
+      intro: 'Error!',
+      message: 'You are already logged in',
+    };
+    return res.redirect(303, '/');
+  }
   res.render('users/register', { title: 'BookedIn || Registration' });
 });
 
