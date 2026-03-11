@@ -1,6 +1,6 @@
 const books = [
     {title: "book one", publishingYear: 2026},
-    {title: "The Power Broker", publishingYear: 1975, genreIds: ["2"]},
+    {title: "The Power Broker", publishingYear: 1975, genreId: ["2"]},
     {title: "Leviathan Wakes", publishingYear: 2011, authorIds: ["0","1"]}
 
 ];
