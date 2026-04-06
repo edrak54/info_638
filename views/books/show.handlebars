@@ -12,7 +12,6 @@
     {{/if}}
 </p>
 
-{{!-- <a href="/books/edit?id={{bookIdx}}">edit</a> --}}
 
 {{#if currentUser}}
 <div>
@@ -33,3 +32,32 @@
   </form>
 </div>
 {{/if}}
+
+<h2>Comments:</h2>
+
+{{#if currentUser}}
+  <form action="/comments/upsert" role="form" method="post">
+    <input type="hidden" name="_csrf" value="{{_csrfToken}}">
+    <input type="hidden" name="bookId" value="{{bookId}}">
+    <input type="hidden" name="userEmail" value="{{currentUser.email}}">
+    <input type="hidden" name="id" value="{{comment.id}}">
+    <label for="text">Comment:</label>
+    <br>
+    <textarea rows="3" cols="30" id="text" name="text">your comment here</textarea>
+    <br>
+    <button type="submit">Post Comment</button>
+  </form>
+{{/if}}
+
+{{#each comments}}
+  <p>
+    {{this.text}}
+    <br>
+    By: {{this.userEmail}}
+    <br>
+    {{#if (eq @root.currentUser.email this.userEmail)}}
+    <a href="/comments/edit?id={{this.id}}">Edit</a>
+    {{/if}}
+  </p>
+{{/each}}
+
