@@ -8,6 +8,7 @@
     <label for="last_name">Last name</label>
     <input type="text" id="last_name" name="lastName" {{#if author}}value="{{author.lastName}}{{/if}}">
   </div>
-  <input type="hidden" value="{{authorIdx}}" name="id">
+  <input type="hidden" value="{{author.id}}" name="id">
   <button type="submit" class="btn btn-primary">Submit</button>
 </form>
+

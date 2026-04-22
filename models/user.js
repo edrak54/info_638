@@ -1,3 +1,4 @@
+const db = require('../database')
 var crypto = require('crypto');
 
 const createSalt = () => {
@@ -5,41 +6,29 @@ const createSalt = () => {
 }
 
 const encryptPassword = (password, salt) => {
-  return crypto.pbkdf2Sync(password, salt, 310000, 32, 'sha256').toString('hex');
+  return crypto.pbkdf2Sync(password, salt, 310000, 32, 'sha256').toString('hex')
 }
 
-const users = [
-  {email: 'edrachma@pratt.edu', name: 'Emily', salt: '2296c25f74263e98585d625f4349738c', encryptedPassword: '4f029bc2ae5b4014d308541076dcb0c6b7b08bfa235ebbf8ff31f0e559a88f91'}
-];
-
-exports.add = (user) => {
+exports.add = async (user) => {
   let salt = createSalt();
-  let newUser = {
-    email: user.email,
-    name: user.name,
-    salt: salt,
-    encryptedPassword: encryptPassword(user.password, salt)
-  }
-  // console.log(newUser);
-  users.push(newUser);
+  let encryptedPassword = encryptPassword(user.password, salt)
+  return db.getPool()
+    .query("INSERT INTO users(email, name, salt, password) VALUES($1, $2, $3, $4) RETURNING *",
+      [user.email, user.name, salt, encryptedPassword])
 }
 
-
-exports.getByEmail = (email) => {
-  return users.find((user) => user.email === email);
-};
-
-exports.login = (login) => {
-  let user = exports.getByEmail(login.email);
+exports.getByEmail = async (email) => {
+  const { rows } = await db.getPool().query("select * from users where email = $1", [email])
+  return db.camelize(rows)[0]
+}
+exports.login = async (login) => {
+  let user = await exports.getByEmail(login.email);
   if (!user) {
     return null;
   }
   let encryptedPassword = encryptPassword(login.password, user.salt);
-  if (user.encryptedPassword === encryptedPassword) {
+  if (user.password === encryptedPassword) {
     return user;
   }
   return null;
 }
-
-
-exports.all = users;

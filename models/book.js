@@ -1,34 +1,50 @@
-const books = [
-    {title: "book one", publishingYear: 2026},
-    {title: "The Power Broker", publishingYear: 1975, genreId: ["2"]},
-    {title: "Leviathan Wakes", publishingYear: 2011, authorIds: ["0","1"]}
+const db = require('../database');
 
-];
-
-exports.get = (idx) => {
-  return books[idx];
+const addAuthorsToBook = async (book, authorIds) => {
+  authorIds.forEach(async (authorId) => {
+    await db.getPool().query(`INSERT INTO authors_books(author_id, book_id) values($1,$2)`,[authorId, book.id])
+  });
+}
+const deleteAuthorsForBook = async (book) => {
+  db.getPool().query(`DELETE from authors_books where book_id = $1`, [book.id]);
 }
 
-exports.add = (book) => {
-  books.push(book);
+exports.get = async (id) => {
+  const { rows } = await db.getPool().query("select * from books where id = $1", [id])
+  return db.camelize(rows)[0];
 }
 
-exports.update = (book) => {
-  books[book.id] = book;
+exports.add = async (book) => {
+  const { rows } = await db.getPool()
+  return db.getPool().query("INSERT INTO books(title, publishing_year, genre_id) VALUES($1, $2, $3) RETURNING *;",
+      [book.title, book.publishingYear, book.genreId]);
+  let newBook = db.camelize(rows)[0]
+  await addAuthorsToBook(newBook, book.authorIds)
+  return newBook
 }
 
-exports.upsert = (book) => {
-  if (book.authorIds && !Array.isArray(book.authorIds)) {
+exports.update = async (book) => {
+  const { rows } = await db.getPool()
+  return await db.getPool().query("UPDATE books SET title = $1, publishing_year = $2, genre_id = $3 where id = $4 RETURNING *;",
+      [book.title, book.publishingYear, book.genreId, book.id]);
+  let newBook = db.camelize(rows)[0]
+  await deleteAuthorsForBook(newBook);
+  await addAuthorsToBook(newBook, book.authorIds);
+  return newBook;
+}
+
+exports.upsert = async (book) => {
+  if (book.authorIds && ! Array.isArray(book.authorIds)) {
     book.authorIds = [book.authorIds];
   }
-  if (book.genreIds && !Array.isArray(book.genreIds)) {
-    book.genreIds = [book.genreIds];
-  }
   if (book.id) {
-    exports.update(book);
+    return exports.update(book);
   } else {
-    exports.add(book);
+    return exports.add(book);
   }
 }
 
-exports.all = books
+exports.all = async () => {
+  const { rows } = await db.getPool().query("select * from books order by id");
+  return db.camelize(rows);
+}

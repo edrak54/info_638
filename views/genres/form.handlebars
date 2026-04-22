@@ -2,8 +2,8 @@
   <input type="hidden" name="_csrf" value="{{_csrfToken}}">
   <div>
     <label for="genre">Genre</label>
-    <input type="text" id="genre" name="genre" {{#if genre}}value="{{genre.genre}}"{{/if}}>
+    <input type="text" id="name" name="name" {{#if genre}}value="{{genre.name}}"{{/if}}>
   </div>
-  <input type="hidden" value="{{genreIdx}}" name="id">
+  <input type="hidden" value="{{genre.id}}" name="id">
   <button type="submit" class="btn btn-primary">Submit</button>
 </form>
